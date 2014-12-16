@@ -52,7 +52,7 @@ def TestPlayerHasFixed(pcParam):
 
 def test_base():
 	print "starting tests"
-	TestPlayerHasFixed(15)
+	TestPlayerHasFixed(9)
 
 test_base()
 

@@ -50,13 +50,9 @@ def Eval_State(pc, dc, side, reward, numPAces, numDAces, level):
 			return -reward, "stand"
 		else:
 			S_val = 0
-			S_max_val = -100000000000
-
 			for i in range(0, numPAces+1):
-				S_val, move = Eval_State(pc - (i * 10), dc, "dealer", reward,numPAces-i,numDAces,level+1)
-				if (S_val >= S_max_val):
-					S_max_val = S_val
-			S_val = S_max_val
+				S_val_current, move = Eval_State(pc - (i * 10), dc, "dealer", reward,numPAces-i,numDAces,level+1)
+				S_val = S_val_current + S_val
 
 			H_val = 0
 			for i in range (1,14):
