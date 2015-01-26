@@ -1,11 +1,22 @@
 import random
 
 debug = 0
+debugTargetLevel = 1
 probCard = 1/ float(13);
+
+def GetDebugLevel():
+	return debugTargetLevel
+
+def SetDebugLevel(aLevel):
+	global debugTargetLevel
+	debugTargetLevel = aLevel
 
 def PrintDebugString(str):
 	if (debug == 1):
 		print str
+
+def PrintCardProbability():
+	print "Card probabilty: {0}".format(probCard)
 
 def CardValue(cardIndex):
 	if (cardIndex == 1):
@@ -54,23 +65,33 @@ def Eval_State(pc, dc, side, reward, numPAces, numDAces, level):
 			return -reward, "stand"
 		else:
 			S_val = 0
+			S_val_max = -1000
 			for i in range(0, numPAces+1):
 				S_val_current, move = Eval_State(pc - (i * 10), dc, "dealer", reward,numPAces-i,numDAces,level+1)
-				S_val = S_val_current + S_val
+				PDSAtLevel("S_val for standing with {0} Ace(s) is {1}".format(i,S_val_current), level, debugTargetLevel)
+				if (S_val_current > S_val_max):
+					S_val_max = S_val_current
+			S_val = S_val_max
 
 			H_val = 0
 			# Number cards A,2,3,4,5,6,7,8,9
 			for i in range (1,10):
-				H_val_current, move = Eval_State(pc + CardValue(i), dc, "player", reward, numPAces+(i==1), numDAces,level+1)
-				PDSAtLevel("Level {4}:  Player hand: {0} ({1} Aces)  Dealer hand: {2} dealer ({3} Aces)".format(pc, numPAces, dc, numDAces, level),level,1)				
-				PDSAtLevel("H_val for card {0} is {1}.".format(GetCardSymbol(i),H_val_current),level,1)
+				H_val_current, move = Eval_State(pc + CardValue(i), dc, "player", reward, numPAces+(i==1), numDAces,level+1)			
 				H_val_current = probCard * float(H_val_current)
+				PDSAtLevel("H_val for card {0} is {1}.".format(GetCardSymbol(i),H_val_current),level,debugTargetLevel)
 				H_val = H_val + H_val_current
+			PDSAtLevel("H_val for hiting a number card is {0}".format(H_val),level, debugTargetLevel)
 
 			# Face cards and 10 - J,Q,K,10
 			H_val_current, move = Eval_State(pc + CardValue(10), dc, "player", reward, numPAces, numDAces,level+1)
 			H_val_current = 4 * probCard * float(H_val_current)
+			PDSAtLevel("H_val for hiting a 10 or face card is {0}".format(H_val_current / 4),level, debugTargetLevel)
+			PDSAtLevel("H_val for hiting any 10 or face card is {0}".format(H_val_current),level, debugTargetLevel)
 			H_val = H_val + H_val_current
+			PDSAtLevel("H_val combined for hit is  {0}".format(H_val),level, debugTargetLevel)
+
+			PDSAtLevel("Summary: Player hand: {0} ({1} Aces)  Dealer hand: {2} dealer ({3} Aces)".format(pc, numPAces, dc, numDAces, level),level,debugTargetLevel)
+			PDSAtLevel("Hit: {0} Stand {1}\n".format(H_val, S_val),level,debugTargetLevel)
 
 			if (S_val > H_val):
 				return S_val, "stand"
@@ -78,7 +99,8 @@ def Eval_State(pc, dc, side, reward, numPAces, numDAces, level):
 				return H_val,"hit"
 
 	elif(side == "dealer"):
-
+		if (pc > 21): # this check needs to be here to make sure that if the player is not applying the ace we'll catch they have over 21
+			return -reward, "stand"
 		if ((dc > 21) and (numDAces > 0)):
 			dc = dc - 10
 			numDAces = numDAces - 1
@@ -94,6 +116,7 @@ def Eval_State(pc, dc, side, reward, numPAces, numDAces, level):
 				H_val_current, move = Eval_State(pc, dc+CardValue(i), "dealer", reward, numPAces, numDAces+(i==1),level+1)
 				H_val_current = probCard * float(H_val_current)
 				H_val = H_val + H_val_current
+
 			H_val_current, move = Eval_State(pc, dc+CardValue(10), "dealer", reward, numPAces, numDAces, level+1)
 			H_val_current = 4 * probCard * float(H_val_current)
 			H_val = H_val + H_val_current
@@ -104,4 +127,4 @@ def Eval_State(pc, dc, side, reward, numPAces, numDAces, level):
 def PDSAtLevel(str, curr_level, target_level):
 	if (debug == 1):
 		if (curr_level == target_level):
-			print str
+			print "Level: {0}: {1}".format(curr_level, str)
