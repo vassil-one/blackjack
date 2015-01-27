@@ -82,7 +82,7 @@ def Eval_State(pc, dc, side, reward, numPAces, numDAces, level):
 				H_val = H_val + H_val_current
 			PDSAtLevel("H_val for hiting a number card is {0}".format(H_val),level, debugTargetLevel)
 
-			# Face cards and 10 - J,Q,K,10
+			# Face cards and 10 - 10,J,Q,K
 			H_val_current, move = Eval_State(pc + CardValue(10), dc, "player", reward, numPAces, numDAces,level+1)
 			H_val_current = 4 * probCard * float(H_val_current)
 			PDSAtLevel("H_val for hiting a 10 or face card is {0}".format(H_val_current / 4),level, debugTargetLevel)

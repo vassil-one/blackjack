@@ -13,6 +13,6 @@ def PlayHand(pc, numPAces, dc, numDAces,dbgLevel):
 def test_base(argv):
 
 	dbgLevel = int(argv[1])
-	PlayHand(12,0,4,0,dbgLevel)
-
+	PlayHand(12,0,6,0,dbgLevel)
+	
 test_base(sys.argv)
